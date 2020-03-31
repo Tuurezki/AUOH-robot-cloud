@@ -113,6 +113,8 @@ load_geometries().then(() => {
     joints[1].geometry.translate(0, -0.282, 0);
     joints[2].geometry.translate(-0.312, -0.670, 0.117);
     joints[3].geometry.translate(-0.26869, -1.74413, 0.19685);
+    joints[4].geometry.translate(-1.31519, -1.96913, -0.00015);
+    joints[5].geometry.translate(-1.54869, -1.96913, -0.08715);
 
     scene.add(joints[0]);
     joints[0].rotation.set(THREE.Math.degToRad(90), 0, 0);
@@ -127,12 +129,21 @@ load_geometries().then(() => {
     joints[1].add(offsets[1]);
     offsets[1].add(joints[2]);
 
-
     //scene.add(joints[3]);
     offsets.push(new THREE.Group());
     offsets[2].position.set(-0.04331, 1.074413, -0.07985);
     joints[2].add(offsets[2]);
     offsets[2].add(joints[3]);
+
+    offsets.push(new THREE.Group());
+    offsets[3].position.set(1.0465, 0.225, 0.197);
+    joints[3].add(offsets[3]);
+    offsets[3].add(joints[4]);
+
+    offsets.push(new THREE.Group());
+    offsets[4].position.set(0.2335, 0, 0.087);
+    joints[4].add(offsets[4]);
+    offsets[4].add(joints[5]);
 
     // J1: [0, 282,0] Y
     // J2: [312, 670, -117] Z
@@ -170,15 +181,17 @@ window.onresize = resize;
 const mqtt_client = mqtt.connect('wss://auoh-mqtt-tuure.herokuapp.com');  // https://auoh-mqtt-tuure.herokuapp.com/
 
 mqtt_client.on('connect', () => {
-    console.log('connected');
+    console.log('connected to Heroku app MQTT broker');
     mqtt_client.subscribe('joints');
 });
 
 mqtt_client.on('message', (topic, message) => {
     if (joints.length == 6) {
         const joint_data = JSON.parse(message);
-        joints[1].rotation.set(0, THREE.Math.degToRad(joint_data.joints[0]), 0);
-        joints[2].rotation.set(0, 0, THREE.Math.degToRad(joint_data.joints[1]));
-        joints[3].rotation.set(0, 0, THREE.Math.degToRad(joint_data.joints[2]) - THREE.Math.degToRad(joint_data.joints[1]));
+        joints[1].rotation.set(0, THREE.Math.degToRad(joint_data.joints[0]), 0); // Rotating around Y-axis
+        joints[2].rotation.set(0, 0, THREE.Math.degToRad(joint_data.joints[1])); // Rotating around Z-axis
+        joints[3].rotation.set(0, 0, THREE.Math.degToRad(joint_data.joints[2]) - THREE.Math.degToRad(joint_data.joints[1])); // Rotating around Z-axis and relati
+        joints[4].rotation.set(THREE.Math.degToRad(joint_data.joints[4]), 0, 0); // Rotating around X-axis
+        joints[5].rotation.set(0, 0,THREE.Math.degToRad(joint_data.joints[5]));  // Rotating around Z-axis
     }
 });
